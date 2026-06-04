@@ -6,22 +6,30 @@ export async function POST(req: Request) {
 
     if (!wallet) {
       return NextResponse.json(
-        {
-          error: "Wallet address is required",
-        },
-        {
-          status: 400,
-        }
+        { error: "Wallet address is required" },
+        { status: 400 }
       );
     }
 
     const apiKey = process.env.ETHERSCAN_API_KEY;
 
     const txResponse = await fetch(
-  `https://api.etherscan.io/v2/api?chainid=1&module=account&action=txlist&address=${wallet}&startblock=0&endblock=99999999&sort=asc&apikey=${apiKey}`
-);
+      `https://api.etherscan.io/v2/api?chainid=1&module=account&action=txlist&address=${wallet}&startblock=0&endblock=99999999&sort=asc&apikey=${apiKey}`
+    );
 
     const txData = await txResponse.json();
+
+    if (txData.status !== "1") {
+      return NextResponse.json(
+        {
+          error: "Etherscan API Error",
+          details: txData,
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
     const transactions = txData.result || [];
 
@@ -45,34 +53,31 @@ export async function POST(req: Request) {
     let walletAge = "Unknown";
 
     if (transactions.length > 0) {
-  const firstTx = transactions[0];
-  const lastTx = transactions[transactions.length - 1];
+      const firstTimestamp =
+        Number(transactions[0]?.timeStamp || 0) * 1000;
 
-  const firstTimestamp =
-    parseInt(firstTx?.timeStamp || "0", 10) * 1000;
+      const lastTimestamp =
+        Number(
+          transactions[transactions.length - 1]?.timeStamp || 0
+        ) * 1000;
 
-  const lastTimestamp =
-    parseInt(lastTx?.timeStamp || "0", 10) * 1000;
+      if (firstTimestamp > 0) {
+        firstTxDate =
+          new Date(firstTimestamp).toLocaleDateString();
 
-  if (firstTimestamp > 0) {
-    firstTxDate = new Date(
-      firstTimestamp
-    ).toLocaleDateString();
+        const ageDays = Math.floor(
+          (Date.now() - firstTimestamp) /
+            (1000 * 60 * 60 * 24)
+        );
 
-    const ageDays = Math.floor(
-      (Date.now() - firstTimestamp) /
-        (1000 * 60 * 60 * 24)
-    );
+        walletAge = `${ageDays} days`;
+      }
 
-    walletAge = `${ageDays} days`;
-  }
-
-  if (lastTimestamp > 0) {
-    lastTxDate = new Date(
-      lastTimestamp
-    ).toLocaleDateString();
-  }
-}
+      if (lastTimestamp > 0) {
+        lastTxDate =
+          new Date(lastTimestamp).toLocaleDateString();
+      }
+    }
 
     const analysis = `
 Wallet Address: ${wallet}
