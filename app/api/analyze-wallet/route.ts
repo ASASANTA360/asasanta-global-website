@@ -45,27 +45,34 @@ export async function POST(req: Request) {
     let walletAge = "Unknown";
 
     if (transactions.length > 0) {
-      const firstTimestamp =
-        Number(transactions[0].timeStamp) * 1000;
+  const firstTx = transactions[0];
+  const lastTx = transactions[transactions.length - 1];
 
-      const lastTimestamp =
-        Number(
-          transactions[transactions.length - 1].timeStamp
-        ) * 1000;
+  const firstTimestamp =
+    parseInt(firstTx?.timeStamp || "0", 10) * 1000;
 
-      firstTxDate =
-        new Date(firstTimestamp).toLocaleDateString();
+  const lastTimestamp =
+    parseInt(lastTx?.timeStamp || "0", 10) * 1000;
 
-      lastTxDate =
-        new Date(lastTimestamp).toLocaleDateString();
+  if (firstTimestamp > 0) {
+    firstTxDate = new Date(
+      firstTimestamp
+    ).toLocaleDateString();
 
-      const ageDays = Math.floor(
-        (Date.now() - firstTimestamp) /
-          (1000 * 60 * 60 * 24)
-      );
+    const ageDays = Math.floor(
+      (Date.now() - firstTimestamp) /
+        (1000 * 60 * 60 * 24)
+    );
 
-      walletAge = `${ageDays} days`;
-    }
+    walletAge = `${ageDays} days`;
+  }
+
+  if (lastTimestamp > 0) {
+    lastTxDate = new Date(
+      lastTimestamp
+    ).toLocaleDateString();
+  }
+}
 
     const analysis = `
 Wallet Address: ${wallet}
