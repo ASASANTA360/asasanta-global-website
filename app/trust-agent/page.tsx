@@ -9,9 +9,16 @@ export default function TrustAgentPage() {
   const [loading, setLoading] = useState(false);
 
   const [score, setScore] = useState<number | null>(null);
-  const [risk, setRisk] = useState("");
-  const [analysis, setAnalysis] = useState("");
-  const [recommendations, setRecommendations] = useState<string[]>([]);
+const [risk, setRisk] = useState("");
+const [analysis, setAnalysis] = useState("");
+
+const [walletAge, setWalletAge] = useState("");
+const [firstTxDate, setFirstTxDate] = useState("");
+const [lastTxDate, setLastTxDate] = useState("");
+const [txCount, setTxCount] = useState<number | null>(null);
+
+const [recommendations, setRecommendations] = useState<string[]>([]);
+
 
   const connectWallet = async () => {
     try {
@@ -56,9 +63,16 @@ export default function TrustAgentPage() {
       const data = await response.json();
 
       setScore(data.score);
-      setRisk(data.risk);
-      setAnalysis(data.analysis);
-      setRecommendations(data.recommendations || []);
+setRisk(data.risk);
+setAnalysis(data.analysis);
+
+setWalletAge(data.walletAge || "");
+setFirstTxDate(data.firstTxDate || "");
+setLastTxDate(data.lastTxDate || "");
+setTxCount(data.txCount || 0);
+
+setRecommendations(data.recommendations || []);
+
     } catch (error) {
       console.error(error);
 
