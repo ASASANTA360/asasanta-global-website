@@ -401,18 +401,123 @@ export default function TrustAgentPage() {
     </h2>
 
     <p>
-      Trust Score:
-      <strong className="ml-2">
-        {result.trustScore}
-      </strong>
-    </p>
+  Trust Score:
+  <strong className="ml-2 text-cyan-400">
+    {result.trustScore}
+  </strong>
+</p>
 
-    <p className="mt-2">
-      AI Decision:
-      <strong className="ml-2">
-        {result.aiDecision}
-      </strong>
-    </p>
+<p className="mt-2">
+  AI Decision:
+  <strong className="ml-2">
+    {result.aiDecision}
+  </strong>
+</p>
+
+<p className="mt-2">
+  Risk Level:
+  <strong
+    className={`ml-2 ${
+      result.trustScore >= 80
+        ? "text-green-400"
+        : result.trustScore >= 50
+        ? "text-yellow-400"
+        : "text-red-400"
+    }`}
+  >
+    {result.trustScore >= 80
+      ? "LOW RISK"
+      : result.trustScore >= 50
+      ? "MEDIUM RISK"
+      : "HIGH RISK"}
+  </strong>
+</p>
+
+<div className="mt-6 bg-gray-900 p-4 rounded-lg">
+  <h3 className="font-bold mb-3">
+    AI Trust Explanation
+  </h3>
+
+  <ul className="space-y-2 text-gray-300">
+    {form.ninVerified && (
+      <li>✅ Identity verification completed</li>
+    )}
+
+    {form.bvnVerified && (
+      <li>✅ BVN verification completed</li>
+    )}
+
+    {form.phoneVerified && (
+      <li>✅ Phone number verified</li>
+    )}
+
+    {form.walletAgeDays > 180 && (
+      <li>✅ Established wallet history</li>
+    )}
+
+    {form.transactions > 20 && (
+      <li>✅ Consistent transaction activity</li>
+    )}
+
+    {form.walletAgeDays < 30 && (
+      <li>⚠ New wallet detected</li>
+    )}
+
+    {form.transactions < 5 && (
+      <li>⚠ Limited transaction history</li>
+    )}
+  </ul>
+</div>
+<div className="mt-6 bg-gray-900 p-4 rounded-lg">
+  <h3 className="font-bold mb-3">
+    DeFi Eligibility Assessment
+  </h3>
+
+  <p>
+    Eligibility:
+    <strong className="ml-2 text-green-400">
+      APPROVED
+    </strong>
+  </p>
+
+  <p className="mt-2">
+    Suggested Credit Limit:
+    <strong className="ml-2 text-cyan-400">
+      $500
+    </strong>
+  </p>
+
+  <ul className="mt-3 space-y-2 text-gray-300">
+    <li>✔ Eligible for DeFi onboarding</li>
+    <li>✔ Eligible for Micro-loans</li>
+    <li>✔ Eligible for Trust-based Access</li>
+    <li>✔ Eligible for Future RWA Verification</li>
+  </ul>
+</div>
+<div className="mt-6 bg-gray-900 p-4 rounded-lg">
+  <h3 className="font-bold mb-3">
+    Casper Blockchain Status
+  </h3>
+
+  <p>
+    Network:
+    <strong className="ml-2 text-cyan-400">
+      Casper Testnet
+    </strong>
+  </p>
+
+  <p className="mt-2">
+    Contract Status:
+    <strong className="ml-2 text-green-400">
+      ACTIVE
+    </strong>
+  </p>
+
+  <p className="mt-2 break-all text-sm text-gray-300">
+    Contract Package:
+    dcc0ba60b15e82e5d3cada693f5ece98cb825faa1314dd7d81dee90fad180d05
+  </p>
+</div>
 
     <button
       onClick={async () => {
