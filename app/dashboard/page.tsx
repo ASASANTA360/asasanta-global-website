@@ -1,8 +1,32 @@
 "use client";
 
+import { useEffect } from "react";
 import AIAssistant from "@/components/AIAssistant";
 
 export default function Dashboard() {
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    const pi = (window as any).Pi;
+
+    console.log("PI OBJECT:", pi);
+
+    if (pi) {
+      try {
+        pi.init({
+          version: "2.0",
+        });
+
+        console.log("INIT SUCCESS");
+      } catch (e) {
+        console.error("INIT ERROR:", e);
+      }
+    }
+  }, 2000);
+
+  return () => clearTimeout(timer);
+}, []);
+
   return (
     <main className="min-h-screen bg-black text-white overflow-hidden">
 
@@ -14,7 +38,7 @@ export default function Dashboard() {
           <div>
 
             <h1 className="text-5xl md:text-6xl font-black">
-              AI Dashboard
+              PI LOGIN 
             </h1>
 
             <p className="text-gray-400 mt-3 text-lg">
@@ -23,21 +47,43 @@ export default function Dashboard() {
             </p>
 
           </div>
-
-          <button
+<button
   onClick={async () => {
     try {
-      const auth = await (window as any).Pi.authenticate([
-        "username",
-      ]);
+      const pi = (window as any).Pi;
 
-      console.log(auth);
+      console.log("PI OBJECT:", pi);
 
-      alert(
-        `Welcome ${auth.user.username}`
-      );
-    } catch (err) {
-      console.error(err);
+      if (!pi) {
+        alert("Pi SDK not loaded");
+        return;
+      }
+  
+      console.log("INIT SUCCESS");
+
+      const auth = await pi.authenticate(
+  ["username"],
+  () => {},
+  () => {}
+);
+
+      console.log("AUTH:", auth);
+
+      await fetch("/api/pi-login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          uid: auth.user.uid,
+          username: auth.user.username,
+        }),
+      });
+
+      alert(`Welcome ${auth.user.username}`);
+    } catch (err: any) {
+      console.error("FULL ERROR:", err);
+      alert(err?.message || "Unknown Error");
     }
   }}
   className="px-8 py-4 rounded-2xl bg-purple-600 text-white font-bold hover:scale-105 transition-all duration-300"

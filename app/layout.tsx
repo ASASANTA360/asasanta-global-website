@@ -17,13 +17,6 @@ export default function RootLayout({
         <Script
           src="https://sdk.minepi.com/pi-sdk.js"
           strategy="afterInteractive"
-          onLoad={() => {
-            if ((window as any).Pi) {
-              (window as any).Pi.init({
-                version: "2.0",
-              });
-            }
-          }}
         />
 
         {children}
