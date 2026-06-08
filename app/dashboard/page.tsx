@@ -1,3 +1,5 @@
+"use client";
+
 import AIAssistant from "@/components/AIAssistant";
 
 export default function Dashboard() {
@@ -22,9 +24,26 @@ export default function Dashboard() {
 
           </div>
 
-          <button className="px-8 py-4 rounded-2xl bg-cyan-400 text-black font-bold hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(34,211,238,0.3)]">
-            Generate Report
-          </button>
+          <button
+  onClick={async () => {
+    try {
+      const auth = await (window as any).Pi.authenticate([
+        "username",
+      ]);
+
+      console.log(auth);
+
+      alert(
+        `Welcome ${auth.user.username}`
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  }}
+  className="px-8 py-4 rounded-2xl bg-purple-600 text-white font-bold hover:scale-105 transition-all duration-300"
+>
+  Login with Pi
+</button>
 
         </div>
 
