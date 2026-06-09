@@ -48,8 +48,6 @@ export default function Dashboard() {
 <button
   onClick={async () => {
     try {
-      console.log("Starting Pi login...");
-
       const pi = (window as any).Pi;
 
       if (!pi) {
@@ -57,14 +55,17 @@ export default function Dashboard() {
         return;
       }
 
-      const auth = await pi.authenticate([
-        "username",
-        "payments",
-      ]);
+      alert("Pi SDK found");
+      alert("Starting Pi authentication...");
 
-      console.log("AUTH RESULT:", auth);
+      const auth = await pi.authenticate(
+        ["username", "payments"],
+        () => {},
+        () => {}
+      );
+
+      console.log("AUTH SUCCESS:", auth);
       console.log("USER:", auth.user);
-      console.log("ACCESS TOKEN:", auth.accessToken);
 
       await fetch("/api/pi-login", {
         method: "POST",
@@ -81,10 +82,10 @@ export default function Dashboard() {
 
     } catch (err: any) {
       console.error("LOGIN ERROR:", err);
-      alert(err?.message || "Login failed");
+      alert("Login Error: " + (err?.message || "Unknown error"));
     }
   }}
-  className="px-8 py-4 rounded-2xl bg-purple-600 text-white font-bold hover:scale-105 transition-all duration-300"
+  className="px-8 py-4 rounded-2xl bg-purple-600 text-white font-bold"
 >
   Login with Pi
 </button>
