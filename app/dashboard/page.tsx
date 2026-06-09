@@ -14,9 +14,8 @@ export default function Dashboard() {
 
   try {
     pi.init({
-      version: "2.0",
-      sandbox: true,
-    });
+  version: "2.0",
+});
 
     console.log("PI INIT SUCCESS");
   } catch (err) {
@@ -28,7 +27,7 @@ export default function Dashboard() {
     <main className="min-h-screen bg-black text-white overflow-hidden">
 
       {/* Header */}
-      <section className="border-b border-white/10 bg-black/60 backdrop-blur-xl sticky top-0 z-50">
+      <section className="border-b border-white/10 bg-black/60 backdr op-blur-xl sticky top-0 z-50">
 
         <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
 
@@ -57,12 +56,14 @@ export default function Dashboard() {
 
       alert("Pi SDK found");
       alert("Starting Pi authentication...");
+      console.log("Current URL:", window.location.href);
+console.log("Pi object:", pi);
 
       const auth = await pi.authenticate(
-        ["username", "payments"],
-        () => {},
-        () => {}
-      );
+  ["username"],
+  () => {},
+  () => {}
+);
 
       console.log("AUTH SUCCESS:", auth);
       console.log("USER:", auth.user);
