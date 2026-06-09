@@ -96,18 +96,7 @@
    };
    return (
 <div>
-  <Script
-      src="https://sdk.minepi.com/pi-sdk.js"
-      strategy="afterInteractive"
-      onLoad={() => {
-        if ((window as any).Pi) {
-          (window as any).Pi.init({
-            version: "2.0",
-          });
-        }
-      }}
-    />
-
+ 
     <main className="min-h-screen bg-black text-white p-8">
       <div className="max-w-4xl mx-auto">
 

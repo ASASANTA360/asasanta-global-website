@@ -1,5 +1,6 @@
 import "./globals.css";
 import Script from "next/script";
+import { ReactNode } from "react";
 
 export const metadata = {
   title: "Asasanta Nexus",
@@ -9,16 +10,18 @@ export const metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <html lang="en">
-      <body className="bg-black text-white antialiased">
+      <head>
         <Script
           src="https://sdk.minepi.com/pi-sdk.js"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
         />
+      </head>
 
+      <body className="bg-black text-white antialiased">
         {children}
       </body>
     </html>

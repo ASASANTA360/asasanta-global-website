@@ -4,30 +4,27 @@ import { useEffect } from "react";
 import AIAssistant from "@/components/AIAssistant";
 
 export default function Dashboard() {
+ useEffect(() => {
+  const pi = (window as any).Pi;
 
-useEffect(() => {
-  const timer = setTimeout(() => {
-    const pi = (window as any).Pi;
+  if (!pi) {
+    console.log("Pi SDK not loaded");
+    return;
+  }
 
-    console.log("PI OBJECT:", pi);
+  try {
+    pi.init({
+      version: "2.0",
+      sandbox: true,
+    });
 
-    if (pi) {
-      try {
-        pi.init({
-          version: "2.0",
-        });
-
-        console.log("INIT SUCCESS");
-      } catch (e) {
-        console.error("INIT ERROR:", e);
-      }
-    }
-  }, 2000);
-
-  return () => clearTimeout(timer);
+    console.log("PI INIT SUCCESS");
+  } catch (err) {
+    console.error("PI INIT ERROR", err);
+  }
 }, []);
-
   return (
+
     <main className="min-h-screen bg-black text-white overflow-hidden">
 
       {/* Header */}
@@ -49,46 +46,86 @@ useEffect(() => {
           </div>
 <button
   onClick={async () => {
-    try {
-      const pi = (window as any).Pi;
+  try {
+    alert("Login button clicked");
+    const pi = (window as any).Pi;
 
-      console.log("PI OBJECT:", pi);
-
-      if (!pi) {
-        alert("Pi SDK not loaded");
-        return;
-      }
-  
-      console.log("INIT SUCCESS");
-
-      const auth = await pi.authenticate(
-  ["username"],
-  () => {},
-  () => {}
-);
-
-      console.log("AUTH:", auth);
-
-      await fetch("/api/pi-login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          uid: auth.user.uid,
-          username: auth.user.username,
-        }),
-      });
-
-      alert(`Welcome ${auth.user.username}`);
-    } catch (err: any) {
-      console.error("FULL ERROR:", err);
-      alert(err?.message || "Unknown Error");
+    if (!pi) {
+      alert("Pi SDK not loaded");
+      return;
     }
-  }}
+
+    const auth = await pi.authenticate([
+  "username",
+  "payments",
+]);
+console.log("AUTH RESULT:", auth);
+console.log("USER:", auth?.user);
+console.log("ACCESS TOKEN:", auth?.accessToken);
+    console.log("AUTH:", auth);
+
+    await fetch("/api/pi-login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        uid: auth.user.uid,
+        username: auth.user.username,
+      }),
+    });
+
+    alert(`Welcome ${auth.user.username}`);
+
+  } catch (err: any) {
+    console.error("FULL ERROR:", err);
+    alert(err?.message || "Login failed");
+  }
+}}
   className="px-8 py-4 rounded-2xl bg-purple-600 text-white font-bold hover:scale-105 transition-all duration-300"
 >
   Login with Pi
+</button>
+
+<button
+  onClick={async () => {
+    try {
+      await (window as any).Pi.createPayment(
+        {
+          amount: 0.01,
+          memo: "Test Payment",
+          metadata: {
+            type: "test",
+          },
+        },
+        {
+          onReadyForServerApproval: (paymentId: string) => {
+            console.log("Payment ID:", paymentId);
+          },
+
+          onReadyForServerCompletion: (
+            paymentId: string,
+            txid: string
+          ) => {
+            console.log("TXID:", txid);
+          },
+
+          onCancel: (payment: any) => {
+            console.log("Payment Cancelled", payment);
+          },
+
+          onError: (error: any) => {
+            console.error(error);
+          },
+        }
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  }}
+  className="px-8 py-4 rounded-2xl bg-green-600 text-white font-bold"
+>
+  Test Pi Payment
 </button>
 
         </div>
