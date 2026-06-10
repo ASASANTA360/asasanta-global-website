@@ -2,15 +2,23 @@ import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(
   {
-    piUid: {
+    userId: {
       type: String,
       required: true,
       unique: true,
     },
-    username: {
+
+    name: String,
+
+    email: {
       type: String,
-      required: true,
+      unique: true,
+      sparse: true,
     },
+
+    walletAddress: String,
+
+    piUsername: String,
   },
   {
     timestamps: true,

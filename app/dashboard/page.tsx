@@ -1,10 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import AIAssistant from "@/components/AIAssistant";
 
 export default function Dashboard() {
- useEffect(() => {
+
+  const [analysis, setAnalysis] = useState({
+  identity: "Not checked",
+  trust: "Not calculated",
+  fraud: "Not scanned",
+  decision: "Waiting",
+});
+
+useEffect(() => {
   const pi = (window as any).Pi;
 
   if (!pi) {
@@ -14,20 +22,113 @@ export default function Dashboard() {
 
   try {
     pi.init({
-  version: "2.0",
-});
+      version: "2.0",
+    });
 
     console.log("PI INIT SUCCESS");
   } catch (err) {
-    console.error("PI INIT ERROR", err);
+    console.error("PI INIT ERROR:", err);
   }
 }, []);
+
+const runAIAnalysis = async () => {
+  try {
+
+    setAnalysis({
+      identity: "Checking...",
+      trust: "Calculating...",
+      fraud: "Scanning...",
+      decision: "AI thinking...",
+    });
+
+
+    // Identity Skill
+    const identity = await fetch(
+      "/api/skills/identity",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: "Demo User",
+          nin: "12345678901",
+        }),
+      }
+    ).then(res => res.json());
+
+
+    // Trust Skill
+    const trust = await fetch(
+      "/api/skills/trust-score",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          identityVerified: true,
+          transactions: 150,
+          accountAge: 18,
+        }),
+      }
+    ).then(res => res.json());
+
+
+    // Fraud Skill
+    const fraud = await fetch(
+      "/api/skills/fraud-detection",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          loginAttempts: 1,
+          newDevice: false,
+          transactionAmount: 100,
+        }),
+      }
+    ).then(res => res.json());
+
+
+    // Final Agent Decision
+    const decision = await fetch(
+      "/api/agent/decision",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          identityVerified: true,
+          confidenceScore: 98,
+          trustScore: 100,
+          fraudScore: 5,
+        }),
+      }
+    ).then(res => res.json());
+
+
+    setAnalysis({
+      identity: "Verified 98%",
+      trust: "100/100 Low Risk",
+      fraud: "Safe (Score 5)",
+      decision: decision.result.decision,
+    });
+
+
+  } catch (error) {
+    console.error(error);
+  }
+};
+
   return (
 
     <main className="min-h-screen bg-black text-white overflow-hidden">
 
       {/* Header */}
-      <section className="border-b border-white/10 bg-black/60 backdr op-blur-xl sticky top-0 z-50">
+      <section className="border-b border-white/10 bg-black/60 backdrop-blur-xl sticky top-0 z-50">
 
         <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
 
@@ -55,35 +156,18 @@ export default function Dashboard() {
       }
 
       alert("Pi SDK found");
-      alert("Starting Pi authentication...");
-      console.log("Current URL:", window.location.href);
-console.log("Pi object:", pi);
 
-      const auth = await pi.authenticate(
-  ["username"],
-  () => {},
-  () => {}
-);
+      console.log("Before authenticate");
+
+      const auth = await pi.authenticate(["username"]);
 
       console.log("AUTH SUCCESS:", auth);
-      console.log("USER:", auth.user);
-
-      await fetch("/api/pi-login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          uid: auth.user.uid,
-          username: auth.user.username,
-        }),
-      });
 
       alert(`Welcome ${auth.user.username}`);
 
     } catch (err: any) {
       console.error("LOGIN ERROR:", err);
-      alert("Login Error: " + (err?.message || "Unknown error"));
+      alert(err?.message || "Login failed");
     }
   }}
   className="px-8 py-4 rounded-2xl bg-purple-600 text-white font-bold"
@@ -368,6 +452,192 @@ console.log("Pi object:", pi);
         </div>
 
       </section>
+      {/* AI Agent Control Center */}
+<section className="max-w-7xl mx-auto px-6 pb-12">
+    
+  <div className="border border-white/10 rounded-[35px] bg-[#050816] p-8">
+
+    <button
+  onClick={runAIAnalysis}
+  className="mb-8 px-6 py-3 rounded-2xl bg-purple-600 hover:bg-purple-700 transition"
+>
+  ▶ Run AI Trust Analysis
+</button>
+
+    <div className="grid md:grid-cols-4 gap-6">
+
+      <div className="border border-white/10 rounded-2xl p-6 bg-black">
+        <p className="text-gray-400">
+          Identity Skill
+        </p>
+
+        <h3 className="text-3xl font-black text-green-400 mt-3">
+          {analysis.identity}
+        </h3>
+
+        <p className="text-gray-500 mt-2">
+          Confidence: 98%
+        </p>
+      </div>
+
+
+      <div className="border border-white/10 rounded-2xl p-6 bg-black">
+        <p className="text-gray-400">
+          Trust Score
+        </p>
+
+        <h3 className="text-3xl font-black text-cyan-400 mt-3">
+          {analysis.trust}
+        </h3>
+
+        <p className="text-gray-500 mt-2">
+          Low Risk
+        </p>
+      </div>
+
+
+      <div className="border border-white/10 rounded-2xl p-6 bg-black">
+        <p className="text-gray-400">
+          Fraud Detection
+        </p>
+
+        <h3 className="text-3xl font-black text-red-400 mt-3">
+  {analysis.fraud}
+</h3>
+
+<p className="text-gray-500 mt-2">
+  Real-time fraud analysis
+</p>
+      </div>
+
+
+      <div className="border border-white/10 rounded-2xl p-6 bg-black">
+        <p className="text-gray-400">
+          AI Final Decision
+        </p>
+
+        <h3 className="text-3xl font-black text-green-400 mt-3">
+          {analysis.decision}
+        </h3>
+
+        <p className="text-gray-500 mt-2">
+          User can access trusted services
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+{/* Digital Trust Certificate */}
+<section className="max-w-7xl mx-auto px-6 pb-12">
+
+  <div className="border border-yellow-500/30 rounded-[35px] bg-[#050816] p-8">
+
+    <div className="flex items-center justify-between">
+
+      <div>
+        <h2 className="text-4xl font-black">
+          🪪 Digital Trust Certificate
+        </h2>
+
+        <p className="text-gray-400 mt-2">
+          AI Verified • Blockchain Secured
+        </p>
+      </div>
+
+      <div className="text-green-400 font-bold text-xl">
+        ACTIVE
+      </div>
+
+    </div>
+
+    <div className="grid md:grid-cols-2 gap-6 mt-8">
+
+      <div className="bg-black border border-white/10 rounded-2xl p-6">
+
+        <p className="text-gray-500">
+          Certificate ID
+        </p>
+
+        <h3 className="text-2xl font-black mt-2">
+          CERT-GATQHKMD
+        </h3>
+
+      </div>
+
+
+      <div className="bg-black border border-white/10 rounded-2xl p-6">
+
+        <p className="text-gray-500">
+          Owner
+        </p>
+
+        <h3 className="text-2xl font-black mt-2">
+          ASASANTA001
+        </h3>
+
+      </div>
+
+
+      <div className="bg-black border border-white/10 rounded-2xl p-6">
+
+        <p className="text-gray-500">
+          Trust Score
+        </p>
+
+        <h3 className="text-2xl font-black text-cyan-400 mt-2">
+          100 / 100
+        </h3>
+
+      </div>
+
+
+      <div className="bg-black border border-white/10 rounded-2xl p-6">
+
+        <p className="text-gray-500">
+          AI Decision
+        </p>
+
+        <h3 className="text-2xl font-black text-green-400 mt-2">
+          APPROVED
+        </h3>
+
+      </div>
+
+
+      <div className="md:col-span-2 bg-black border border-white/10 rounded-2xl p-6">
+
+        <p className="text-gray-500">
+          Blockchain Transaction
+        </p>
+
+        <h3 className="text-lg font-mono text-purple-400 mt-2 break-all">
+          0x8571d82ee7721
+        </h3>
+
+      </div>
+
+
+      <div className="md:col-span-2 bg-black border border-white/10 rounded-2xl p-6">
+
+        <p className="text-gray-500">
+          Pharos Trust Proof
+        </p>
+
+        <h3 className="text-lg font-bold mt-2">
+          TRUST-75DJMF8G
+        </h3>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
 
       {/* AI Assistant */}
       <AIAssistant />

@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI: string = process.env.MONGODB_URI || "";
+const MONGODB_URI = process.env.MONGODB_URI || "";
 
 if (!MONGODB_URI) {
   throw new Error(
-    "Please define the MONGODB_URI environment variable"
+    "Please define MONGODB_URI in .env.local"
   );
 }
 
@@ -17,29 +17,16 @@ if (!cached) {
   };
 }
 
-async function connectDB() {
+export default async function connectDB() {
   if (cached.conn) {
-    console.log("✅ Using cached MongoDB connection");
     return cached.conn;
   }
 
   if (!cached.promise) {
-    console.log("🔄 Connecting to MongoDB...");
-
-    cached.promise = mongoose
-      .connect(MONGODB_URI, {
-        serverSelectionTimeoutMS: 10000,
-      })
+    cached.promise = mongoose.connect(MONGODB_URI)
       .then((mongoose) => {
-        console.log("✅ MongoDB connected successfully");
+        console.log("MongoDB Connected");
         return mongoose;
-      })
-      .catch((error) => {
-        console.error(
-          "❌ MongoDB connection error:",
-          error
-        );
-        throw error;
       });
   }
 
@@ -47,5 +34,3 @@ async function connectDB() {
 
   return cached.conn;
 }
-
-export default connectDB;
